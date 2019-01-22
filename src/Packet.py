@@ -179,19 +179,32 @@
 """
 import copy
 import struct
+from array import array
 from struct import *
 
 
 class Packet:
-    def __init__(self, buf):
+
+    def __init__(self, buf=None, version=None, type=None, length=None, ip=None, port=None, body=None):
         """
-        The decoded buffer should convert to a new packet.
+            The decoded buffer should convert to a new packet.
 
         :param buf: Input buffer was just decoded.
         :type buf: bytearray
         """
-        self.buf = copy.copy(buf)
-        pass
+
+        if buf is None:
+            self.version, self.type, self.length, self.ip, self.port, self.body = version, type, length, ip, port, body
+            parts = [int(part) for part in ip.split('.')]
+            self.buf = struct.pack(">hhihhhhi", version, type, length, parts[0], parts[1], parts[2], parts[3], port)
+            self.buf = self.buf + bytes(body, 'utf-8')
+        else:
+            self.buf = copy.copy(buf)
+            self.version, self.type, self.length = struct.unpack(">hhi", buf[0:8])
+            parts = struct.unpack(">hhhh", buf[8:16])
+            self.ip = '.'.join(str(int(part)).zfill(3) for part in parts)
+            self.port = struct.unpack("i", buf[16:20])
+            self.body = self.buf[20:].decode()
 
     def get_header(self):
         """
@@ -214,7 +227,7 @@ class Packet:
         :return: Packet Version
         :rtype: int
         """
-        return int.from_bytes(self.buf[0:2], byteorder='big', signed=False)
+        return self.version
 
     def get_type(self):
         """
@@ -222,7 +235,7 @@ class Packet:
         :return: Packet type
         :rtype: int
         """
-        return int.from_bytes(self.buf[2:4], byteorder='big', signed=False)
+        return self.type
 
     def get_length(self):
         """
@@ -230,7 +243,7 @@ class Packet:
         :return: Packet length
         :rtype: int
         """
-        return int.from_bytes(self.buf[4:8], byteorder='big', signed=False)
+        return self.length
 
     def get_body(self):
         """
@@ -283,6 +296,7 @@ class PacketFactory:
     """
     This class is only for making Packet objects.
     """
+
 
     @staticmethod
     def parse_buffer(buffer):
@@ -379,7 +393,7 @@ class PacketFactory:
 
 if __name__ == "__main__":
     buf = b'\x00\x01\x00\x04\x00\x00\x00\x0c\x00\xc0\x00\xa8\x00\x01\x00\x01\x00\x00\xfd\xe8Hello World!'
-    packet = Packet(buf)
+    packet = Packet(buf=buf)
     print("Header:", packet.get_header())
     print("Body:", packet.get_body())
     print("Version:", packet.get_version())
@@ -387,6 +401,9 @@ if __name__ == "__main__":
     print("Length:", packet.get_length())
     print("IP:", packet.get_source_server_ip())
     print("Port:", packet.get_source_server_port())
+    print("Buf:", packet.get_buf())
+
+    packet = Packet(None, 1, 4, 12, "192.168.001.001", 65000, "Hello World!")
     print("Buf:", packet.get_buf())
 
 
