@@ -177,6 +177,8 @@
             
     
 """
+import copy
+import struct
 from struct import *
 
 
@@ -188,6 +190,7 @@ class Packet:
         :param buf: Input buffer was just decoded.
         :type buf: bytearray
         """
+        self.buf = copy.copy(buf)
         pass
 
     def get_header(self):
@@ -196,7 +199,14 @@ class Packet:
         :return: Packet header
         :rtype: str
         """
-        pass
+        header = ""
+        header += "Body:" + str(packet.get_body())
+        header += "  Version:" + str(packet.get_version())
+        header += "  Type:" + str(packet.get_type())
+        header += "  Length:" + str(packet.get_length())
+        header += "  IP:" + packet.get_source_server_ip()
+        header += "  Port:" + packet.get_source_server_port()
+        return header
 
     def get_version(self):
         """
@@ -204,7 +214,7 @@ class Packet:
         :return: Packet Version
         :rtype: int
         """
-        pass
+        return int.from_bytes(self.buf[0:2], byteorder='big', signed=False)
 
     def get_type(self):
         """
@@ -212,7 +222,7 @@ class Packet:
         :return: Packet type
         :rtype: int
         """
-        pass
+        return int.from_bytes(self.buf[2:4], byteorder='big', signed=False)
 
     def get_length(self):
         """
@@ -220,7 +230,7 @@ class Packet:
         :return: Packet length
         :rtype: int
         """
-        pass
+        return int.from_bytes(self.buf[4:8], byteorder='big', signed=False)
 
     def get_body(self):
         """
@@ -228,7 +238,7 @@ class Packet:
         :return: Packet body
         :rtype: str
         """
-        pass
+        return self.buf[20:].decode()
 
     def get_buf(self):
         """
@@ -237,7 +247,7 @@ class Packet:
         :return The parsed packet to the network format.
         :rtype: bytearray
         """
-        pass
+        return copy.copy(self.buf)
 
     def get_source_server_ip(self):
         """
@@ -245,7 +255,12 @@ class Packet:
         :return: Server IP address for the sender of the packet.
         :rtype: str
         """
-        pass
+        parts = []
+        for i in range(9, 16, 2):
+            part_byte = self.buf[i]
+            parts.append(int(part_byte))
+
+        return '.'.join(str(int(part)).zfill(3) for part in parts)
 
     def get_source_server_port(self):
         """
@@ -253,7 +268,7 @@ class Packet:
         :return: Server Port address for the sender of the packet.
         :rtype: str
         """
-        pass
+        return str(int.from_bytes(self.buf[16:20], byteorder='big', signed=False))
 
     def get_source_server_address(self):
         """
@@ -261,7 +276,7 @@ class Packet:
         :return: Server address; The format is like ('192.168.001.001', '05335').
         :rtype: tuple
         """
-        pass
+        return self.get_source_server_ip(), self.get_source_server_port()
 
 
 class PacketFactory:
@@ -360,3 +375,19 @@ class PacketFactory:
         :rtype: Packet
         """
         pass
+
+
+if __name__ == "__main__":
+    buf = b'\x00\x01\x00\x04\x00\x00\x00\x0c\x00\xc0\x00\xa8\x00\x01\x00\x01\x00\x00\xfd\xe8Hello World!'
+    packet = Packet(buf)
+    print("Header:", packet.get_header())
+    print("Body:", packet.get_body())
+    print("Version:", packet.get_version())
+    print("Type:", packet.get_type())
+    print("Length:", packet.get_length())
+    print("IP:", packet.get_source_server_ip())
+    print("Port:", packet.get_source_server_port())
+    print("Buf:", packet.get_buf())
+
+
+
