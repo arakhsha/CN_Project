@@ -196,7 +196,7 @@ class Packet:
         if buf is None:
             self.version, self.type, self.length, self.ip, self.port, self.body = version, type, length, ip, port, body
             parts = [int(part) for part in ip.split('.')]
-            self.buf = struct.pack(">hhihhhhi", version, type, length, parts[0], parts[1], parts[2], parts[3], port)
+            self.buf = struct.pack(">hhihhhhi", version, int(type), length, parts[0], parts[1], parts[2], parts[3], port)
             self.buf = self.buf + bytes(body, 'utf-8')
         else:
             self.buf = copy.copy(buf)
@@ -218,7 +218,7 @@ class Packet:
         header += "  Type:" + str(packet.get_type())
         header += "  Length:" + str(packet.get_length())
         header += "  IP:" + packet.get_source_server_ip()
-        header += "  Port:" + packet.get_source_server_port()
+        header += "  Port:" + str(packet.get_source_server_port())
         return header
 
     def get_version(self):
@@ -251,7 +251,7 @@ class Packet:
         :return: Packet body
         :rtype: str
         """
-        return self.buf[20:].decode()
+        return self.body
 
     def get_buf(self):
         """
@@ -268,12 +268,7 @@ class Packet:
         :return: Server IP address for the sender of the packet.
         :rtype: str
         """
-        parts = []
-        for i in range(9, 16, 2):
-            part_byte = self.buf[i]
-            parts.append(int(part_byte))
-
-        return '.'.join(str(int(part)).zfill(3) for part in parts)
+        return self.ip
 
     def get_source_server_port(self):
         """
@@ -281,7 +276,7 @@ class Packet:
         :return: Server Port address for the sender of the packet.
         :rtype: str
         """
-        return str(int.from_bytes(self.buf[16:20], byteorder='big', signed=False))
+        return self.port
 
     def get_source_server_address(self):
         """
@@ -296,7 +291,7 @@ class PacketFactory:
     """
     This class is only for making Packet objects.
     """
-
+    version = 0
 
     @staticmethod
     def parse_buffer(buffer):
@@ -403,7 +398,7 @@ if __name__ == "__main__":
     print("Port:", packet.get_source_server_port())
     print("Buf:", packet.get_buf())
 
-    packet = Packet(None, 1, 4, 12, "192.168.001.001", 65000, "Hello World!")
+    packet = Packet(None, 1, '4', 12, "192.168.001.001", 65000, "Hello World!")
     print("Buf:", packet.get_buf())
 
 
