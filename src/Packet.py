@@ -201,6 +201,7 @@ class Packet:
         else:
             self.buf = copy.copy(buf)
             self.version, self.type, self.length = struct.unpack(">hhi", buf[0:8])
+            self.type = str(self.type)
             parts = struct.unpack(">hhhh", buf[8:16])
             self.ip = '.'.join(str(int(part)).zfill(3) for part in parts)
             self.port = struct.unpack("i", buf[16:20])
