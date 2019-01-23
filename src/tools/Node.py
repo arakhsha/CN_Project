@@ -1,3 +1,5 @@
+import copy
+
 from src.tools.simpletcp.clientsocket import ClientSocket
 
 
@@ -40,10 +42,8 @@ class Node:
         if len(self.out_buff) == 0:
             return
 
-        size = max(len(self.out_buff), Node.message_size)
-
-        message = self.out_buff[0:size]
-        self.out_buff = self.out_buff[size:]
+        message = copy.copy(self.out_buff)
+        self.out_buff = []
         self.socket.send(message)
 
     def add_message_to_out_buff(self, message):
