@@ -20,7 +20,7 @@ class Stream:
 
         self.nodes = []
         self.ip = Node.parse_ip(ip)
-        self.port = Node.parse_port(port)
+        self.port = port
 
         self._server_in_buf = []
 
@@ -35,13 +35,16 @@ class Stream:
             """
             queue.put(bytes('ACK', 'utf8'))
             self._server_in_buf.append(data)
+            print("Data Received:", data)
 
         self.tcpserver = TCPServer(self.ip, self.port, callback)
 
         def run_sever():
+            # print("TCPServer Started")
             self.tcpserver.run()
 
-        threading.Thread(target=run_sever)
+        server_thread = threading.Thread(target=run_sever)
+        server_thread.start()
 
     def get_server_address(self):
         """
@@ -159,3 +162,26 @@ class Stream:
         for node in self.nodes:
             if node.is_register or (not only_register):
                 node.send_message()
+
+
+if __name__ == "__main__":
+    print(type(b'x5'))
+    side = input()
+    if side == "1":
+        stream1 = Stream("127.000.000.001", 10007)
+        # print("TCPServer Started")
+        input()
+        stream1.add_node(("127.000.000.001", 20007))
+        # print("Connected to Other Side")
+        stream1.add_message_to_out_buff(("127.000.000.001", 20007), "Salam")
+        # print("Added to Buffer")
+        stream1.send_out_buf_messages()
+        # print("Sent")
+    else:
+        stream2 = Stream("127.000.000.001", 20007)
+        while True:
+            pass
+
+
+
+
