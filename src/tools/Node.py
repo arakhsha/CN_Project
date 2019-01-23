@@ -20,6 +20,8 @@ class Node:
         :param set_root:
         :param set_register:
         """
+        self.is_register = set_register
+        self.is_root = set_root
         self.server_ip = Node.parse_ip(server_address[0])
         self.server_port = Node.parse_port(server_address[1])
         # TODO Exception Handling???
