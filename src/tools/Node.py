@@ -2,6 +2,9 @@ from src.tools.simpletcp.clientsocket import ClientSocket
 
 
 class Node:
+
+    message_size = 2048
+
     def __init__(self, server_address, set_root=False, set_register=False):
         """
         The Node object constructor.
@@ -19,11 +22,12 @@ class Node:
         """
         self.server_ip = Node.parse_ip(server_address[0])
         self.server_port = Node.parse_port(server_address[1])
+        # TODO Exception Handling???
+        self.socket = ClientSocket(self.server_ip, self.server_port, single_use=False)
 
         print("Server Address: ", server_address)
 
         self.out_buff = []
-        pass
 
     def send_message(self):
         """
@@ -31,7 +35,14 @@ class Node:
 
         :return:
         """
-        pass
+        if len(self.out_buff) == 0:
+            return
+
+        size = max(len(self.out_buff), Node.message_size)
+
+        message = self.out_buff[0:size]
+        self.out_buff = self.out_buff[size:]
+        self.socket.send(message)
 
     def add_message_to_out_buff(self, message):
         """
@@ -47,7 +58,7 @@ class Node:
         Closing client's object.
         :return:
         """
-        self.client.close()
+        self.socket.close()
 
     def get_server_address(self):
         """
