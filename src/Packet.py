@@ -204,7 +204,7 @@ class Packet:
             self.type = str(self.type)
             parts = struct.unpack(">hhhh", buf[8:16])
             self.ip = '.'.join(str(int(part)).zfill(3) for part in parts)
-            self.port = struct.unpack("i", buf[16:20])
+            self.port = struct.unpack(">i", buf[16:20])[0]
             self.body = self.buf[20:].decode()
 
     def get_header(self):
@@ -368,7 +368,7 @@ class PacketFactory:
         :rtype Packet
 
         """
-        pass
+
 
     @staticmethod
     def new_message_packet(message, source_server_address):
