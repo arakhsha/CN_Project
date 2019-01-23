@@ -25,7 +25,7 @@ class Node:
         self.is_register = set_register
         self.is_root = set_root
         self.server_ip = Node.parse_ip(server_address[0])
-        self.server_port = Node.parse_port(server_address[1])
+        self.server_port = int(server_address[1])
         # TODO Exception Handling???
         self.socket = ClientSocket(self.server_ip, self.server_port, single_use=False)
 
@@ -42,7 +42,14 @@ class Node:
         if len(self.out_buff) == 0:
             return
 
-        message = copy.copy(self.out_buff)
+        parts = copy.copy(self.out_buff)
+        message = b''
+        for part in parts:
+            print(part)
+            if type(part) == bytes:
+                message += part
+            elif type(part) == str:
+                message += bytes(part, "UTF-8")
         self.out_buff = []
         self.socket.send(message)
 
