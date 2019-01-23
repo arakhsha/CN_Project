@@ -18,8 +18,9 @@ class Stream:
         :param port: 5 characters
         """
 
-        ip = Node.parse_ip(ip)
-        port = Node.parse_port(port)
+        self.nodes = []
+        self.ip = Node.parse_ip(ip)
+        self.port = Node.parse_port(port)
 
         self._server_in_buf = []
 
@@ -35,7 +36,12 @@ class Stream:
             queue.put(bytes('ACK', 'utf8'))
             self._server_in_buf.append(data)
 
-        pass
+        self.tcpserver = TCPServer(self.ip, self.port, callback)
+
+        def run_sever():
+            self.tcpserver.run()
+
+        threading.Thread(target=run_sever)
 
     def get_server_address(self):
         """
@@ -43,7 +49,7 @@ class Stream:
         :return: Our TCPServer address
         :rtype: tuple
         """
-        pass
+        return self.ip, self.port
 
     def clear_in_buff(self):
         """
@@ -65,6 +71,8 @@ class Stream:
 
         :return:
         """
+        node = Node(server_address, set_root=False, set_register=set_register_connection)
+        self.nodes.append(node)
         pass
 
     def remove_node(self, node):
@@ -79,7 +87,8 @@ class Stream:
 
         :return:
         """
-        pass
+        self.nodes.remove(node)
+        node.close()
 
     def get_node_by_server(self, ip, port):
         """
@@ -95,7 +104,10 @@ class Stream:
         :return: The node that input address.
         :rtype: Node
         """
-        pass
+        for node in self.nodes:
+            if node.get_server_address() == (ip, port):
+                return node
+        return None
 
     def add_message_to_out_buff(self, address, message):
         """
@@ -110,7 +122,9 @@ class Stream:
 
         :return:
         """
-        pass
+        node = self.get_node_by_server(address[0], address[1])
+        if node is not None:
+            node.add_message_to_out_buff(message)
 
     def read_in_buf(self):
         """
@@ -134,7 +148,7 @@ class Stream:
 
         :return:
         """
-        pass
+        node.send_message()
 
     def send_out_buf_messages(self, only_register=False):
         """
@@ -142,4 +156,6 @@ class Stream:
 
         :return:
         """
-        pass
+        for node in self.nodes:
+            if node.is_register or (not only_register):
+                node.send_message()
