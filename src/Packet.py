@@ -185,7 +185,7 @@ from struct import *
 
 class Packet:
 
-    def __init__(self, buf=None, version=None, type=None, length=None, ip=None, port=None, body=None):
+    def __init__(self, buf=None, version=None, type=None, ip=None, port=None, body=None):
         """
             The decoded buffer should convert to a new packet.
 
@@ -194,9 +194,10 @@ class Packet:
         """
 
         if buf is None:
-            self.version, self.type, self.length, self.ip, self.port, self.body = version, type, length, ip, port, body
+            self.version, self.type, self.ip, self.port, self.body = version, type, ip, port, body
+            self.length = len(body) + 20
             parts = [int(part) for part in ip.split('.')]
-            self.buf = struct.pack(">hhihhhhi", version, int(type), length, parts[0], parts[1], parts[2], parts[3], port)
+            self.buf = struct.pack(">hhihhhhi", version, int(type), self.length, parts[0], parts[1], parts[2], parts[3], port)
             self.buf = self.buf + bytes(body, 'utf-8')
         else:
             self.buf = copy.copy(buf)
@@ -399,7 +400,7 @@ if __name__ == "__main__":
     print("Port:", packet.get_source_server_port())
     print("Buf:", packet.get_buf())
 
-    packet = Packet(None, 1, '4', 12, "192.168.001.001", 65000, "Hello World!")
+    packet = Packet(None, 1, '4', "192.168.001.001", 65000, "Hello World!")
     print("Buf:", packet.get_buf())
 
 
