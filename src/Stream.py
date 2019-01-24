@@ -38,7 +38,7 @@ class Stream:
                 self._server_in_buf += data
             elif type(data) == str:
                 self._server_in_buf += bytes(data, "UTF-8")
-            print("Data Received, New Buffer:", self.read_in_buf())
+            # print("Data Received, New Buffer:", self.read_in_buf())
 
         self.tcpserver = TCPServer(self.ip, self.port, callback)
 
@@ -131,6 +131,8 @@ class Stream:
         node = self.get_node_by_server(address[0], address[1])
         if node is not None:
             node.add_message_to_out_buff(message)
+        else:
+            raise ValueError("Node not in Stream")
 
     def read_in_buf(self):
         """

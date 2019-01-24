@@ -2,9 +2,11 @@ from src.Peer import Peer
 
 if __name__ == "__main__":
     side = input()
+    port = int(input("port:"))
     if side == '1':
-        server = Peer("127.000.000.001", 20007, is_root=True)
+        server = Peer("127.000.000.001", port, is_root=True)
         server.run()
     else:
-        client = Peer("127.000.000.001", 10007, is_root=False, root_address=("127.000.000.001", 20007))
+        server_port = int(input("server port:"))
+        client = Peer("127.000.000.001", port, is_root=False, root_address=("127.000.000.001", server_port))
         client.run()
