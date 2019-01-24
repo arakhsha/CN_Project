@@ -38,7 +38,7 @@ class Stream:
                 self._server_in_buf += data
             elif type(data) == str:
                 self._server_in_buf += bytes(data, "UTF-8")
-            print("Data Received:", data)
+            print("Data Received, New Buffer:", self.read_in_buf())
 
         self.tcpserver = TCPServer(self.ip, self.port, callback)
 
@@ -171,18 +171,33 @@ class Stream:
 
 
 if __name__ == "__main__":
-    print(type(b'x5'))
     side = input()
     if side == "1":
         stream1 = Stream("127.000.000.001", 10007)
         # print("TCPServer Started")
         input()
         stream1.add_node(("127.000.000.001", 20007))
-        # print("Connected to Other Side")
-        stream1.add_message_to_out_buff(("127.000.000.001", 20007), "Salam")
-        # print("Added to Buffer")
+        stream1.add_message_to_out_buff(("127.000.000.001", 20007), b"\xaa\xbb")
         stream1.send_out_buf_messages()
-        # print("Sent")
+
+        stream1.add_message_to_out_buff(("127.000.000.001", 20007), b"\xcc\xdd")
+        stream1.send_out_buf_messages()
+
+        stream1.add_message_to_out_buff(("127.000.000.001", 20007), b"\xee\xff")
+        stream1.send_out_buf_messages()
+    elif side == "3":
+        stream1 = Stream("127.000.000.001", 30007)
+        # print("TCPServer Started")
+        input()
+        stream1.add_node(("127.000.000.001", 20007))
+        stream1.add_message_to_out_buff(("127.000.000.001", 20007), b"\x11\x22")
+        stream1.send_out_buf_messages()
+
+        stream1.add_message_to_out_buff(("127.000.000.001", 20007), b"\x33\x44")
+        stream1.send_out_buf_messages()
+
+        stream1.add_message_to_out_buff(("127.000.000.001", 20007), b"\x55\66")
+        stream1.send_out_buf_messages()
     else:
         stream2 = Stream("127.000.000.001", 20007)
         while True:
