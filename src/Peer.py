@@ -106,8 +106,9 @@ class Peer:
         # TODO Warning 1?
         while True:
             packet = self.parse_in_buf()
-            if packet is not None:
+            while packet is not None:
                 self.handle_packet(packet)
+                packet = self.parse_in_buf()
             self.parse_interface_buf()
             self.stream.send_out_buf_messages()
             time.sleep(2)
