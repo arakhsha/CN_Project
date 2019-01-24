@@ -83,17 +83,19 @@ class NetworkGraph:
         :rtype: GraphNode
         """
 
-        sender_node = self.find_node(sender[0], sender[1])
-        if sender_node is None:
-            return None
-        else:
-            bfs_queue = queue.Queue(-1)
-            bfs_queue.put(self.root)
-            while not bfs_queue.Empty:
-                head = bfs_queue.get()
-                bfs_queue.put(head.children)
-                if head.is_available():
-                    return head
+        # sender_node = self.find_node(sender[0], sender[1])
+        # if sender_node is None:
+        #     return None
+        # else:
+        # TODO warning
+        bfs_queue = queue.Queue(-1)
+        bfs_queue.put(self.root)
+        while not bfs_queue.Empty:
+            head = bfs_queue.get()
+            if head.is_available():
+                return head
+            for child in head.children:
+                bfs_queue.put(child)
 
     def find_node(self, ip, port):
         for node in self.nodes:
