@@ -54,7 +54,7 @@ class GraphNode:
         subtree = []
         subtree += self.children
         for child in self.children:
-            subtree += child.get_subtree
+            subtree += child.get_subtree()
         return subtree
 
     def is_full(self):
@@ -68,6 +68,17 @@ class GraphNode:
 
     def remove_child(self, child):
         self.children.remove(child)
+
+    def print_summary(self):
+        print("ip/port:", self.ip, "/", str(self.port), "alive:", self.alive)
+        if self.parent is not None:
+            print("parent:", self.parent.ip + "/" + str(self.parent.port))
+        else:
+            print("parent: None")
+        print("children:")
+        for child in self.children:
+            print(child.ip + "/" + str(child.port))
+
 
 class NetworkGraph:
     def __init__(self, root):
@@ -101,7 +112,7 @@ class NetworkGraph:
         # TODO warning
         bfs_queue = queue.Queue(-1)
         bfs_queue.put(self.root)
-        while not bfs_queue.Empty:
+        while not bfs_queue.empty():
             head = bfs_queue.get()
             if head.is_available():
                 return head
@@ -149,7 +160,7 @@ class NetworkGraph:
         pass
 
     def register_node(self, ip, port):
-        if self.find_node(ip , port) is None:
+        if self.find_node(ip, port) is None:
             new_node = GraphNode((ip, port))
             self.nodes.append(new_node)
         pass
@@ -176,8 +187,59 @@ class NetworkGraph:
         node = self.find_node(ip, port)
         parent_node = self.find_node(father_address[0], father_address[1])
 
+        if node is None:
+            raise ValueError("Node is not registered")
+
+        if parent_node is None:
+            raise ValueError("Parent Node is not registered")
+
+        if node.parent is not None:
+            # TODO:
+            # we still don't know what to do in this case
+            parent_node.remove_child(node)
+            pass
+
         # add to child
-        node.set_parent(father_address)
+        node.set_parent(parent_node)
         # add to parent
         parent_node.add_child(node)
+        pass
 
+    def find_parent_and_assign(self, ip, port):
+        parent = self.find_parent((ip, port))
+        self.assign_parent(ip, port, parent.get_address())
+
+    def print_all(self):
+        for node in self.nodes:
+            node.print_summary()
+            print("\n")
+
+
+if __name__ == "__main__":
+    root = GraphNode(("127.0.0.1", 10))
+    networkGraph = NetworkGraph(root)
+    while True:
+        # 1. register node\n2. set father \n3. remove node \n4. show all nodes\n5. end\n"
+        command = int(input(""))
+        if command == 1:
+            # ip:
+            # port:
+            ip = input("")
+            port = int(input(""))
+            networkGraph.register_node(ip, port)
+        elif command == 2:
+            # ip:
+            # port:
+            ip = input("")
+            port = int(input(""))
+            networkGraph.find_parent_and_assign(ip, port)
+        elif command == 3:
+            # ip:
+            # port:
+            ip = input("")
+            port = int(input(""))
+            networkGraph.remove_node((ip, port))
+        elif command == 4:
+            networkGraph.print_all()
+        elif command == 5:
+            break
