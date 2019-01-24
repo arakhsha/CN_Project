@@ -372,8 +372,9 @@ class PacketFactory:
         :rtype Packet
 
         """
-        pass
-
+        body = "JOIN"
+        return Packet(None, PacketFactory.version, Type.join, source_server_address[0], source_server_address[1],
+                      body)
     @staticmethod
     def new_register_packet(type, source_server_address, address=(None, None)):
         """
