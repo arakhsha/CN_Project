@@ -44,7 +44,11 @@ class Peer:
         """
         self.stream = Stream(server_ip, server_port)
         self.packet_factory = PacketFactory()
-        # TODO Interface
+
+        self.interface = UserInterface()
+        self.interface.setDaemon(True)
+
+
         self.is_root = is_root
         self.root_address = root_address
         self.reunion_daemon = threading.Thread(target=self.run_reunion_daemon, daemon=True)
@@ -69,7 +73,7 @@ class Peer:
 
         :return:
         """
-        pass
+        self.interface.start()
 
     def handle_user_interface_buffer(self):
         """
@@ -104,6 +108,7 @@ class Peer:
 
         :return:
         """
+        self.start_user_interface()
         self.reunion_daemon.start()
         # TODO Warning 1?
         while True:
