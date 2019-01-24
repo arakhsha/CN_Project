@@ -98,7 +98,17 @@ class Peer:
 
         :return:
         """
-        pass
+        self.reunion_daemon.start()
+        # TODO Warning 1?
+        while True:
+            packet = self.parse_in_buf()
+            if packet is not None:
+                self.handle_packet(packet)
+            self.parse_interface_buf()
+            self.stream.send_out_buf_messages()
+            time.sleep(2)
+
+
 
     def run_reunion_daemon(self):
         """
@@ -295,4 +305,10 @@ class Peer:
         :param sender: Sender of the packet
         :return: The specified neighbour for the sender; The format is like ('192.168.001.001', '05335').
         """
+        pass
+
+    def parse_in_buf(self):
+        return None
+
+    def parse_interface_buf(self):
         pass
