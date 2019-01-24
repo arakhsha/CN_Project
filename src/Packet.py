@@ -214,12 +214,12 @@ class Packet:
         :rtype: str
         """
         header = ""
-        header += "Body:" + str(packet.get_body())
-        header += "  Version:" + str(packet.get_version())
-        header += "  Type:" + str(packet.get_type())
-        header += "  Length:" + str(packet.get_length())
-        header += "  IP:" + packet.get_source_server_ip()
-        header += "  Port:" + str(packet.get_source_server_port())
+        header += "Body:" + str(self.get_body())
+        header += "  Version:" + str(self.get_version())
+        header += "  Type:" + str(self.get_type())
+        header += "  Length:" + str(self.get_length())
+        header += "  IP:" + self.get_source_server_ip()
+        header += "  Port:" + str(self.get_source_server_port())
         return header
 
     def get_version(self):
