@@ -354,7 +354,12 @@ class PacketFactory:
         :rtype Packet
 
         """
-        pass
+        body = ""
+        body += type
+        if type == "RES":
+            body += Node.parse_ip(neighbour[0])
+            body += Node.parse_port(neighbour[1])
+        return Packet(None, PacketFactory.version, Type.advertise, source_server_address[0], source_server_address[1], body)
 
     @staticmethod
     def new_join_packet(source_server_address):
