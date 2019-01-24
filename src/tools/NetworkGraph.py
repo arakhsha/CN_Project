@@ -20,12 +20,18 @@ class GraphNode:
 
     def set_parent(self, parent):
         self.parent = parent
+        self.alive = True
+        for child in self.children:
+            child.alive = True
         pass
 
     def set_address(self, new_address):
         self.ip = new_address[0]
         self.port = new_address[1]
         pass
+
+    def get_address(self):
+        return self.ip, self.port
 
     def __reset(self):
         self.parent = None
@@ -57,6 +63,11 @@ class GraphNode:
     def is_available(self):
         return (not self.is_full()) and self.alive
 
+    def remove_from_parent(self):
+        self.parent.remove_child(self)
+
+    def remove_child(self, child):
+        self.children.remove(child)
 
 class NetworkGraph:
     def __init__(self, root):
@@ -64,7 +75,7 @@ class NetworkGraph:
         root.alive = True
         self.nodes = [root]
 
-    def find_live_node(self, sender):
+    def find_parent(self, sender):
         """
         Here we should find a neighbour for the sender.
         Best neighbour is the node who is nearest the root and has not more than one child.
@@ -83,17 +94,20 @@ class NetworkGraph:
         :rtype: GraphNode
         """
 
-        sender_node = self.find_node(sender[0], sender[1])
-        if sender_node is None:
-            return None
-        else:
-            bfs_queue = queue.Queue(-1)
-            bfs_queue.put(self.root)
-            while not bfs_queue.Empty:
-                head = bfs_queue.get()
-                bfs_queue.put(head.children)
-                if head.is_available():
-                    return head
+        # sender_node = self.find_node(sender[0], sender[1])
+        # if sender_node is None:
+        #     return None
+        # else:
+        # TODO warning
+        bfs_queue = queue.Queue(-1)
+        bfs_queue.put(self.root)
+        while not bfs_queue.Empty:
+            head = bfs_queue.get()
+            if head.is_available():
+                return head
+            for child in head.children:
+                bfs_queue.put(child)
+        return None
 
     def find_node(self, ip, port):
         for node in self.nodes:
@@ -129,10 +143,18 @@ class NetworkGraph:
         else:
             for child_node in node.get_subtree():
                 child_node.set_dead()
+
+            node.remove_from_parent()
             self.nodes.remove(node)
         pass
 
-    def add_node(self, ip, port, father_address):
+    def register_node(self, ip, port):
+        if self.find_node(ip , port) is None:
+            new_node = GraphNode((ip, port))
+            self.nodes.append(new_node)
+        pass
+
+    def assign_parent(self, ip, port, father_address):
         """
         Add a new node with node_address if it does not exist in our NetworkGraph and set its father.
 
@@ -151,4 +173,11 @@ class NetworkGraph:
 
         :return:
         """
-        pass
+        node = self.find_node(ip, port)
+        parent_node = self.find_node(father_address[0], father_address[1])
+
+        # add to child
+        node.set_parent(father_address)
+        # add to parent
+        parent_node.add_child(node)
+
