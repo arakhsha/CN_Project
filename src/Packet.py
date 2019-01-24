@@ -414,7 +414,8 @@ class PacketFactory:
         :return: New Message packet.
         :rtype: Packet
         """
-        pass
+        return Packet(None, PacketFactory.version, Type.message, source_server_address[0], source_server_address[1],
+                      message)
 
 
 if __name__ == "__main__":
