@@ -54,6 +54,10 @@ class Peer:
 
         if not is_root:
             # TODO Register
+            packet = Packet(None, 1, '1', 30, server_ip, server_port, body="0123456789")
+            self.stream.add_node(root_address, set_register_connection=True)
+            self.stream.add_message_to_out_buff(root_address, packet.get_buf())
+            self.stream.send_out_buf_messages()
             pass
 
 
@@ -165,7 +169,9 @@ class Peer:
         :type packet Packet
 
         """
-        pass
+        print("A New Packet Received!")
+        print("Header: ", packet.get_header())
+        print("Body: ", packet.get_body())
 
     def __check_registered(self, source_address):
         """
