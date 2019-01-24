@@ -1,6 +1,8 @@
 from src.Stream import Stream
 from src.Packet import Packet, PacketFactory
+from src.Type import Type
 from src.UserInterface import UserInterface
+from src.tools.Node import Node
 from src.tools.SemiNode import SemiNode
 from src.tools.NetworkGraph import NetworkGraph, GraphNode
 import time
@@ -42,6 +44,8 @@ class Peer:
         :type is_root: bool
         :type root_address: tuple
         """
+        self.ip = Node.parse_ip(server_ip)
+        self.port = server_port
         self.stream = Stream(server_ip, server_port)
         self.packet_factory = PacketFactory()
 
@@ -57,14 +61,7 @@ class Peer:
             self.network_graph = NetworkGraph(root_node)
 
         if not is_root:
-            # TODO Register
-            while True:
-                packet = Packet(None, 1, '1', server_ip, server_port, body="0123456789")
-                self.stream.add_node(root_address, set_register_connection=True)
-                self.stream.add_message_to_out_buff(root_address, packet.get_buf())
-                self.stream.send_out_buf_messages()
-                time.sleep(1)
-            pass
+            self.stream.add_node(root_address, True)
 
 
     def start_user_interface(self):
@@ -101,7 +98,7 @@ class Peer:
                 elif command.lower() == "sendmessage":
                     if len(args) >= 1:
                         self.send_message(args[1])
-        pass
+            time.sleep(0.1)
 
     def run(self):
         """
@@ -189,9 +186,12 @@ class Peer:
         :type packet Packet
 
         """
-        print("A New Packet Received!")
-        print("Header: ", packet.get_header())
-        print("Body: ", packet.get_body())
+        # print("A New Packet Received!")
+        # print("Header: ", packet.get_header())
+        # print("Body: ", packet.get_body())
+
+        if packet.get_type() == Type.register:
+            self.__handle_register_packet(packet)
 
     def __check_registered(self, source_address):
         """
@@ -250,7 +250,15 @@ class Peer:
         :type packet Packet
         :return:
         """
-        pass
+        body = packet.get_body()
+        type = body[0:3]
+        if type == "REQ" and self.is_root:
+            ip = body[3:18]
+            port = body[18:23]
+            print("Registering ", ip, port)
+        elif type == "RES" and (not self.is_root):
+            if body[3:6] == "ACK":
+                print("Register ACKed")
 
     def __check_neighbour(self, address):
         """
@@ -349,7 +357,10 @@ class Peer:
 
     def register(self):
         print("Register Command!")
-        pass
+        if self.is_root:
+            return
+        req = self.packet_factory.new_register_packet("REQ", (self.ip, self.port), (self.ip, self.port))
+        self.stream.add_message_to_out_buff(self.root_address, req.get_buf())
 
     def advertise(self):
         print("Advertisement Command!")

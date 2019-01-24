@@ -131,6 +131,8 @@ class Stream:
         node = self.get_node_by_server(address[0], address[1])
         if node is not None:
             node.add_message_to_out_buff(message)
+        else:
+            raise ValueError("Node not in Stream")
 
     def read_in_buf(self):
         """
