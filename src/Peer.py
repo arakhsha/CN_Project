@@ -42,7 +42,20 @@ class Peer:
         :type is_root: bool
         :type root_address: tuple
         """
-        pass
+        self.stream = Stream(server_ip, server_port)
+        self.packet_factory = PacketFactory()
+        # TODO Interface
+        self.is_root = is_root
+        self.root_address = root_address
+        self.reunion_daemon = threading.Thread(target=self.run_reunion_daemon)
+        if is_root:
+            root_node = GraphNode((server_port, server_ip))
+            self.network_graph = NetworkGraph(root_node)
+
+        if not is_root:
+            # TODO Register
+            pass
+
 
     def start_user_interface(self):
         """
