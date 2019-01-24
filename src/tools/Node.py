@@ -29,7 +29,7 @@ class Node:
         # TODO Exception Handling???
         self.socket = ClientSocket(self.server_ip, self.server_port, single_use=False)
 
-        print("Server Address: ", server_address)
+        # print("New Node Server Address: ", server_address)
 
         self.out_buff = []
 
@@ -45,7 +45,6 @@ class Node:
         parts = copy.copy(self.out_buff)
         message = b''
         for part in parts:
-            print(part)
             if type(part) == bytes:
                 message += part
             elif type(part) == str:
