@@ -46,7 +46,7 @@ class Stream:
             # print("TCPServer Started")
             self.tcpserver.run()
 
-        server_thread = threading.Thread(target=run_sever, daemon=False)
+        server_thread = threading.Thread(target=run_sever, daemon=True)
         server_thread.start()
 
     def get_server_address(self):

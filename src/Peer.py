@@ -47,17 +47,19 @@ class Peer:
         # TODO Interface
         self.is_root = is_root
         self.root_address = root_address
-        self.reunion_daemon = threading.Thread(target=self.run_reunion_daemon)
+        self.reunion_daemon = threading.Thread(target=self.run_reunion_daemon, daemon=True)
         if is_root:
             root_node = GraphNode((server_port, server_ip))
             self.network_graph = NetworkGraph(root_node)
 
         if not is_root:
             # TODO Register
-            packet = Packet(None, 1, '1', 30, server_ip, server_port, body="0123456789")
-            self.stream.add_node(root_address, set_register_connection=True)
-            self.stream.add_message_to_out_buff(root_address, packet.get_buf())
-            self.stream.send_out_buf_messages()
+            while True:
+                packet = Packet(None, 1, '1', 30, server_ip, server_port, body="0123456789")
+                self.stream.add_node(root_address, set_register_connection=True)
+                self.stream.add_message_to_out_buff(root_address, packet.get_buf())
+                self.stream.send_out_buf_messages()
+                time.sleep(1)
             pass
 
 
