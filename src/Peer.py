@@ -47,7 +47,7 @@ class Peer:
 
         self.interface = UserInterface()
         self.interface.setDaemon(True)
-
+        self.parse_interface_thread = threading.Thread(target=self.handle_user_interface_buffer, daemon=True)
 
         self.is_root = is_root
         self.root_address = root_address
@@ -59,7 +59,7 @@ class Peer:
         if not is_root:
             # TODO Register
             while True:
-                packet = Packet(None, 1, '1', 30, server_ip, server_port, body="0123456789")
+                packet = Packet(None, 1, '1', server_ip, server_port, body="0123456789")
                 self.stream.add_node(root_address, set_register_connection=True)
                 self.stream.add_message_to_out_buff(root_address, packet.get_buf())
                 self.stream.send_out_buf_messages()
@@ -74,6 +74,7 @@ class Peer:
         :return:
         """
         self.interface.start()
+        self.parse_interface_thread.start()
 
     def handle_user_interface_buffer(self):
         """
@@ -88,6 +89,18 @@ class Peer:
             2. Don't forget to clear our UserInterface buffer.
         :return:
         """
+        while True:
+            while len(self.interface.buffer) > 0:
+                args = self.interface.buffer[0].split()
+                command = args[0]
+                self.interface.buffer = self.interface.buffer[1:]
+                if command.lower() == "register":
+                    self.register()
+                elif command.lower() == "advertise":
+                    self.advertise()
+                elif command.lower() == "sendmessage":
+                    if len(args) >= 1:
+                        self.send_message(args[1])
         pass
 
     def run(self):
@@ -116,7 +129,6 @@ class Peer:
             while packet is not None:
                 self.handle_packet(packet)
                 packet = self.parse_in_buf()
-            self.parse_interface_buf()
             self.stream.send_out_buf_messages()
             time.sleep(2)
 
@@ -335,5 +347,14 @@ class Peer:
         self.stream.delete_buffer(packet_length)
         return packet
 
-    def parse_interface_buf(self):
+    def register(self):
+        print("Register Command!")
+        pass
+
+    def advertise(self):
+        print("Advertisement Command!")
+        pass
+
+    def send_message(self, message):
+        print("Message Command! Message:", message)
         pass
