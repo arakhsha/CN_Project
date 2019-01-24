@@ -390,7 +390,15 @@ class PacketFactory:
         :rtype Packet
 
         """
-
+        body = ""
+        body += type
+        if type == "REQ":
+            body += Node.parse_ip(address[0])
+            body += Node.parse_port(address[1])
+        else:
+            body += "ACK"
+        return Packet(None, PacketFactory.version, Type.register, source_server_address[0], source_server_address[1],
+                      body)
 
     @staticmethod
     def new_message_packet(message, source_server_address):
