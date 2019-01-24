@@ -166,6 +166,9 @@ class Stream:
             if node.is_register or (not only_register):
                 node.send_message()
 
+    def delete_buffer(self, length):
+        self._server_in_buf = self._server_in_buf[length:]
+
 
 if __name__ == "__main__":
     print(type(b'x5'))
