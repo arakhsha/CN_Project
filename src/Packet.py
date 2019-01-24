@@ -182,6 +182,9 @@ import struct
 from array import array
 from struct import *
 
+from src.Type import Type
+from src.tools.Node import Node
+
 
 class Packet:
 
@@ -322,7 +325,19 @@ class PacketFactory:
         :return New reunion packet.
         :rtype Packet
         """
-        pass
+
+        body = ""
+        body += type
+        body += str(len(nodes_array)).zfill(2)
+        if type == "REQ":
+            for i in range(len(nodes_array)):
+                body += Node.parse_ip(nodes_array[i][0])
+                body += Node.parse_port(nodes_array[i][1])
+        else:
+            for i in range(len(nodes_array) - 1, -1, -1):
+                body += Node.parse_ip(nodes_array[i][0])
+                body += Node.parse_port(nodes_array[i][1])
+        return Packet(None, PacketFactory.version, Type.reunion, source_address[0], source_address[1], body)
 
     @staticmethod
     def new_advertise_packet(type, source_server_address, neighbour=None):
@@ -390,7 +405,8 @@ class PacketFactory:
 
 if __name__ == "__main__":
     buf = b'\x00\x01\x00\x04\x00\x00\x00\x0c\x00\xc0\x00\xa8\x00\x01\x00\x01\x00\x00\xfd\xe8Hello World!'
-    packet = Packet(buf=buf)
+    factory = PacketFactory()
+    packet = factory.new_reunion_packet("RES", ("192.168.001.001", 650), [('192.168.1.1', 650), ('192.168.1.2', 750)])
     print("Header:", packet.get_header())
     print("Body:", packet.get_body())
     print("Version:", packet.get_version())
