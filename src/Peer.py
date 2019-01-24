@@ -254,8 +254,12 @@ class Peer:
         type = body[0:3]
         if type == "REQ" and self.is_root:
             ip = body[3:18]
-            port = body[18:23]
+            port = int(body[18:23])
             print("Registering ", ip, port)
+            # TODO Graph Checks and operations
+            self.stream.add_node((ip, port), set_register_connection=True)
+            res = self.packet_factory.new_register_packet("RES", (self.ip, self.port))
+            self.stream.add_message_to_out_buff((ip, port), res.get_buf())
         elif type == "RES" and (not self.is_root):
             if body[3:6] == "ACK":
                 print("Register ACKed")
