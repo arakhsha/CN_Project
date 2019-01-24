@@ -22,7 +22,7 @@ class Stream:
         self.ip = Node.parse_ip(ip)
         self.port = port
 
-        self._server_in_buf = []
+        self._server_in_buf = b''
 
         def callback(address, queue, data):
             """
@@ -34,7 +34,10 @@ class Stream:
             :return:
             """
             queue.put(bytes('ACK', 'utf8'))
-            self._server_in_buf.append(data)
+            if type(data) == bytes:
+                self._server_in_buf += data
+            elif type(data) == str:
+                self._server_in_buf += bytes(data, "UTF-8")
             print("Data Received:", data)
 
         self.tcpserver = TCPServer(self.ip, self.port, callback)
@@ -134,7 +137,7 @@ class Stream:
         Only returns the input buffer of our TCPServer.
 
         :return: TCPServer input buffer.
-        :rtype: list
+        :rtype: bytearray
         """
         return self._server_in_buf
 
