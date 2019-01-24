@@ -38,7 +38,7 @@ class Stream:
                 self._server_in_buf += data
             elif type(data) == str:
                 self._server_in_buf += bytes(data, "UTF-8")
-            print("Data Received, New Buffer:", self.read_in_buf())
+            # print("Data Received, New Buffer:", self.read_in_buf())
 
         self.tcpserver = TCPServer(self.ip, self.port, callback)
 
