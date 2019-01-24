@@ -308,7 +308,18 @@ class Peer:
         pass
 
     def parse_in_buf(self):
-        return None
+        buffer = self.stream.read_in_buf()
+        header_size = 20
+        if len(buffer) < header_size:
+            return None
+
+        packet = Packet(buf=buffer)
+        packet_length = packet.get_length()
+        if len(buffer) < packet_length:
+            return None
+        packet = Packet(buf=buffer[0:packet_length])
+        self.stream.delete_buffer(packet_length)
+        return packet
 
     def parse_interface_buf(self):
         pass
