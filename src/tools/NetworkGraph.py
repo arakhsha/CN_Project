@@ -90,7 +90,7 @@ class GraphNode:
     def is_expired(self):
         if self.is_root:
             return False
-        return (time.time() - self.latest_reunion_time) <= self.expiration_time()
+        return (time.time() - self.latest_reunion_time) >= self.expiration_time()
 
     def expiration_time(self):
         if self.depth() >= 0:
@@ -269,6 +269,7 @@ class NetworkGraph:
 
     def remove_all_expired_nodes(self):
         for node in self.__get_all_expired_nodes():
+            print("Time: ", time.time(), "Last:", node.latest_reunion_time, "Expire:", node.expiration_time(), "Removing Node: ", node.get_address())
             self.remove_node(node.get_address())
 
     def update_latest_reunion_time(self, peer_address):
