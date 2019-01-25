@@ -23,7 +23,7 @@ class Peer:
     SEND_REUNION_INTERVAL = 4
     REUNION_BACK_TIMEOUT = 4 + 2 * (8 * 2.5) + 2
 
-    def __init__(self, server_ip, server_port, is_root=False, root_address=None, gui=False):
+    def __init__(self, server_ip, server_port, is_root=False, root_address=None, gui=False, interface=None):
         """
         The Peer object constructor.
 
@@ -57,11 +57,7 @@ class Peer:
         self.stream = Stream(server_ip, server_port)
         self.packet_factory = PacketFactory()
 
-        if not self.has_gui:
-            self.interface = UserInterface()
-            self.interface.setDaemon(True)
-        else:
-            self.interface = GraphicalUserInterface(is_root)
+        self.interface = interface
         self.parse_interface_thread = threading.Thread(target=self.handle_user_interface_buffer, daemon=True)
 
         self.is_root = is_root
@@ -81,17 +77,6 @@ class Peer:
             self.last_reunion_back = 0
             self.is_alive = False
 
-    def start_user_interface(self):
-        """
-        For starting UserInterface thread.
-
-        :return:
-        """
-        if self.has_gui:
-            self.interface.run()
-        else:
-            self.interface.start()
-        self.parse_interface_thread.start()
 
     def handle_user_interface_buffer(self):
         """
@@ -153,27 +138,20 @@ class Peer:
         :return:
         """
 
-        def ordinary_run_daemon():
-            self.reunion_daemon.start()
-            # TODO Warning 1?
-            while True:
+        self.reunion_daemon.start()
+        self.parse_interface_thread.start()
+        # TODO Warning 1?
+        while True:
+            packet = self.parse_in_buf()
+            while packet is not None:
+                print("PACKET HEADER:", packet.get_header())
+                self.handle_packet(packet)
                 packet = self.parse_in_buf()
-                while packet is not None:
-                    print("PACKET HEADER:", packet.get_header())
-                    self.handle_packet(packet)
-                    packet = self.parse_in_buf()
-                try:
-                    self.stream.send_out_buf_messages()
-                except LostConnection as lc:
-                    self.handle_lost_connection(lc.node)
-                time.sleep(2)
-        ordinary_run_thread = threading.Thread(target=ordinary_run_daemon, daemon=True)
-        if self.has_gui:
-            ordinary_run_thread.start()
-            self.start_user_interface()
-        else:
-            self.start_user_interface()
-            ordinary_run_daemon()
+            try:
+                self.stream.send_out_buf_messages()
+            except LostConnection as lc:
+                self.handle_lost_connection(lc.node)
+            time.sleep(2)
 
     def run_reunion_daemon(self):
         """

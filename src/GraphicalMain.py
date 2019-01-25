@@ -1,7 +1,10 @@
+import threading
 from tkinter import *
 from tkinter import simpledialog
 from src.Peer import Peer
 from tkinter import ttk
+
+from src.UserInterface import GraphicalUserInterface
 
 if __name__ == "__main__":
     def root(event=None):  # event is passed by binders.
@@ -11,8 +14,14 @@ if __name__ == "__main__":
         if port is None:
             return
         top.destroy()
-        server = Peer("127.000.000.001", port, is_root=True, gui=True)
-        server.run()
+        interface = GraphicalUserInterface(True)
+        server = Peer("127.000.000.001", port, is_root=True, gui=True, interface=interface)
+
+        def run_peer():
+            server.run()
+        threading.Thread(target=run_peer, daemon=True).start()
+        interface.run()
+
 
     def client(event=None):
         server_port = simpledialog.askinteger("Input", "Root Port?",
@@ -26,8 +35,14 @@ if __name__ == "__main__":
         if port is None:
             return
         top.destroy()
-        client = Peer("127.000.000.001", port, is_root=False, root_address=("127.000.000.001", server_port), gui=True)
-        client.run()
+        interface = GraphicalUserInterface(False)
+        client = Peer("127.000.000.001", port, is_root=False, root_address=("127.000.000.001", server_port), gui=True, interface=interface)
+
+        def run_peer():
+            client.run()
+        threading.Thread(target=run_peer, daemon=True).start()
+        interface.run()
+
 
     top = Tk()
     top.title("P2P App")
