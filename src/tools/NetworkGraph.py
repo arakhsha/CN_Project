@@ -87,6 +87,8 @@ class GraphNode:
         self.latest_reunion_time = time.time()
 
     def is_expired(self):
+        if self.is_root:
+            return False
         return (time.time() - self.latest_reunion_time) <= self.expiration_time()
 
     def expiration_time(self):
