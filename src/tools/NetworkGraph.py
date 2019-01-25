@@ -93,7 +93,10 @@ class GraphNode:
 
     def expiration_time(self):
         # TODO: expiration time policy
-        return self.depth()*0.1+4
+        if self.depth() >= 0:
+            return self.depth()*0.1+4
+        else:
+            return 0.1*8+4
 
     def depth(self):
         if self.is_root:
