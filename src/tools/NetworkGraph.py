@@ -173,7 +173,8 @@ class NetworkGraph:
 
     def remove_node(self, node_address):
         """
-        when a node becomes disabled that node is removed and all of its subtree nodes become dead
+        when a node becomes disabled that node becomes dead and removed from it's parent
+        and all of its subtree nodes become dead too
         :param node_address:
         :return:
         """
@@ -183,10 +184,9 @@ class NetworkGraph:
         else:
             for child_node in node.get_subtree():
                 child_node.set_dead()
-                child_node.parent = None
 
             node.remove_from_parent()
-            self.nodes.remove(node)
+            # self.nodes.remove(node)
         pass
 
     def register_node(self, ip, port):
