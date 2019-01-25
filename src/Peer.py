@@ -257,13 +257,30 @@ class Peer:
                sub-tree.
             4. When an Advertise Response packet arrived update our Peer parent for sending Reunion Packets.
 
-        :param packet: Arrived register packet
+        :param packet: Arrived advertise packet
 
         :type packet Packet
 
         :return:
         """
-        pass
+        body = packet.get_body()
+        type = body[0:3]
+        if type == "REQ" and self.is_root:
+            ip = packet.get_source_server_ip()
+            port = int(packet.get_source_server_port())
+            parent_address = self.network_graph.find_parent_and_assign(ip, port)
+            if parent_address is None:
+                # Ignore, the node is not registered
+                return
+            else:
+                print("Answering Ad REQ of", ip, port, "Parent:", parent_address[0], parent_address[1])
+                res = self.packet_factory.new_advertise_packet("RES", (self.ip, self.port), parent_address)
+                self.stream.add_message_to_out_buff((ip, port), res.get_buf())
+        elif type == "RES" and (not self.is_root):
+            server_ip = body[3:18]
+            server_port = int(body[18:23])
+            print("Proposed Parent:", server_ip, server_port)
+            # TODO: send join message to parent and handle parent in self and Stream
 
     def __handle_register_packet(self, packet):
         """

@@ -225,8 +225,7 @@ class NetworkGraph:
             raise ValueError("Parent Node is not registered")
 
         if node.parent is not None:
-            # TODO:
-            # we still don't know what to do in this case
+            # TODO: we still don't know what to do in this case
             parent_node.remove_child(node)
             pass
 
@@ -238,7 +237,11 @@ class NetworkGraph:
 
     def find_parent_and_assign(self, ip, port):
         parent = self.find_parent((ip, port))
-        self.assign_parent(ip, port, parent.get_address())
+        try:
+            self.assign_parent(ip, port, parent.get_address())
+        except ValueError as e:
+            print(repr(e), ip, "/", port)
+            return None
         return parent.get_address()
 
     def print_all(self):
@@ -271,7 +274,7 @@ class NetworkGraph:
 
 
 if __name__ == "__main__":
-    root = GraphNode(("127.0.0.1", 10))
+    root = GraphNode(("127.000.000.001", 10))
     networkGraph = NetworkGraph(root)
     while True:
         # 1. register node\n2. set father \n3. remove node \n4. show all nodes\n5. end\n"
