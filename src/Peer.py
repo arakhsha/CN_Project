@@ -141,7 +141,7 @@ class Peer:
         while True:
             packet = self.parse_in_buf()
             while packet is not None:
-                print("FUCK PACKET:", packet.get_body())
+                print("FUCK PACKET:", packet.get_header())
                 self.handle_packet(packet)
                 packet = self.parse_in_buf()
             self.stream.send_out_buf_messages()
