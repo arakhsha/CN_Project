@@ -2,7 +2,7 @@ from src.Stream import Stream
 from src.Packet import Packet, PacketFactory
 from src.Type import Type
 from src.UserInterface import UserInterface
-from src.tools.Node import Node
+from src.tools.Node import Node, LostConnection
 from src.tools.SemiNode import SemiNode
 from src.tools.NetworkGraph import NetworkGraph, GraphNode
 import time
@@ -148,7 +148,10 @@ class Peer:
                 print("PACKET HEADER:", packet.get_header())
                 self.handle_packet(packet)
                 packet = self.parse_in_buf()
-            self.stream.send_out_buf_messages()
+            try:
+                self.stream.send_out_buf_messages()
+            except LostConnection as lc:
+                self.handle_lost_connection(lc.node)
             time.sleep(2)
 
     def run_reunion_daemon(self):
@@ -302,7 +305,8 @@ class Peer:
             # remove former parent node
             if self.father_address is not None:
                 try:
-                    parent_node = self.stream.get_node_by_server(self.father_address[0], self.father_address[1], only_not_registers=True)
+                    parent_node = self.stream.get_node_by_server(self.father_address[0], self.father_address[1],
+                                                                 only_not_registers=True)
                     self.stream.remove_node(parent_node)
                 except ValueError as e:
                     print(repr(e))
@@ -495,7 +499,7 @@ class Peer:
 
     def advertise(self):
         print("Advertisement Command")
-        req = self.packet_factory.new_advertise_packet("REQ",(self.ip, self.port))
+        req = self.packet_factory.new_advertise_packet("REQ", (self.ip, self.port))
         self.stream.add_message_to_out_buff(self.root_address, req.get_buf())
         pass
 
@@ -511,3 +515,10 @@ class Peer:
     def timeout(self):
         self.is_alive = False
         self.advertise()
+
+    def handle_lost_connection(self, node):
+        self.stream.remove_node(node)
+        print("Connection with ", node.get_server_address(), " lost")
+        if node.get_server_address() == self.father_address:
+            print("Connection with father lost")
+            self.timeout()

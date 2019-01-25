@@ -3,8 +3,12 @@ import copy
 from src.tools.simpletcp.clientsocket import ClientSocket
 
 
-class Node:
+class LostConnection(Exception):
+    def __init__(self, node):
+        self.node = node
 
+
+class Node:
     message_size = 2048
 
     def __init__(self, server_address, set_root=False, set_register=False):
@@ -26,8 +30,10 @@ class Node:
         self.is_root = set_root
         self.server_ip = Node.parse_ip(server_address[0])
         self.server_port = int(server_address[1])
-        # TODO Exception Handling???
-        self.socket = ClientSocket(self.server_ip, self.server_port, single_use=False)
+        try:
+            self.socket = ClientSocket(self.server_ip, self.server_port, single_use=False)
+        except:
+            raise LostConnection(self)
 
         # print("New Node Server Address: ", server_address)
 
@@ -50,7 +56,10 @@ class Node:
             elif type(part) == str:
                 message += bytes(part, "UTF-8")
         self.out_buff = []
-        self.socket.send(message)
+        try:
+            self.socket.send(message)
+        except:
+            raise LostConnection(self)
 
     def add_message_to_out_buff(self, message):
         """
