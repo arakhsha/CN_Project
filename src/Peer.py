@@ -346,7 +346,50 @@ class Peer:
         :param packet: Arrived reunion packet
         :return:
         """
-        pass
+        body = packet.get_body()
+        type = body[0:3]
+        number_of_entries = int(body[3:5])
+        entries = []
+        for i in range(number_of_entries):
+            entry_ip = body[5 + i * 20: 5 + i * 20 + 15]
+            entry_port = int(body[5 + i * 20 + 15: 5 + i * 20 + 20])
+            entries.append((entry_ip, entry_port))
+        if number_of_entries < 1:
+            print("Warning: Invalid Reunion Packet")
+            return
+        if type == "REQ":
+            if self.is_root:
+                self.network_graph.update_latest_reunion_time(entries[0])
+                first_hop = entries[-1]
+                entries.reverse()
+                res = self.packet_factory.new_reunion_packet("RES", (self.ip, self.port), entries)
+                self.stream.add_message_to_out_buff(first_hop, res.get_buf())
+            else:
+                if not self.is_alive:
+                    return
+                entries.append((self.ip, self.port))
+                res = self.packet_factory.new_reunion_packet("REQ", (self.ip, self.port), entries)
+                self.stream.add_message_to_out_buff(self.father_address, res.get_buf())
+
+        if type == "RES":
+            if self.is_root:
+                print("Warning: Invalid Reunion Packet")
+                return
+            if (self.ip, self.port) == entries[0]:
+                self.last_reunion_back = time.time()
+                return
+            if (self.ip, self.port) != entries[-1]:
+                print("Warning: Invalid Reunion Packet")
+                return
+            entries = entries[0:-1]
+            next_hop = entries[-1]
+            res = self.packet_factory.new_reunion_packet("RES", (self.ip, self.port), entries)
+            self.stream.add_message_to_out_buff(next_hop, res.get_buf())
+
+
+
+
+
 
     def __handle_join_packet(self, packet):
         """
