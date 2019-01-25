@@ -269,7 +269,7 @@ class NetworkGraph:
 
     def remove_all_expired_nodes(self):
         for node in self.__get_all_expired_nodes():
-            self.remove_node(node.get_address)
+            self.remove_node(node.get_address())
 
     def update_latest_reunion_time(self, peer_address):
         node = self.find_node(peer_address[0], peer_address[1])
