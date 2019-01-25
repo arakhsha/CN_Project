@@ -262,7 +262,8 @@ class NetworkGraph:
 
     def remove_all_expired_nodes(self):
         for node in self.__get_all_expired_nodes():
-            self.remove_node(node.get_address)
+            if node.alive:
+                self.remove_node(node.get_address)
 
 
 if __name__ == "__main__":
