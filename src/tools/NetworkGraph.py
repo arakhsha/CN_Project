@@ -265,6 +265,10 @@ class NetworkGraph:
             if node.alive:
                 self.remove_node(node.get_address)
 
+    def set_latest_reunion_time(self, peer_address):
+        node = self.find_node(peer_address[0], peer_address[1])
+        node.update_latest_reunion_time()
+
 
 if __name__ == "__main__":
     root = GraphNode(("127.0.0.1", 10))
