@@ -171,6 +171,9 @@ class Stream:
     def delete_buffer(self, length):
         self._server_in_buf = self._server_in_buf[length:]
 
+    def get_nodes(self):
+        return self.nodes
+
 
 if __name__ == "__main__":
     side = input()
