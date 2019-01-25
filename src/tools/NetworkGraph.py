@@ -1,5 +1,6 @@
 import queue
 import time
+import traceback
 
 
 class GraphNode:
@@ -241,11 +242,12 @@ class NetworkGraph:
         parent = self.find_parent((ip, port))
         if parent is None:
             return None
-        # try:
-        self.assign_parent(ip, port, parent.get_address())
-        # except ValueError as e:
-        #     print(repr(e), ip, "/", port)
-        #     return None
+        try:
+            self.assign_parent(ip, port, parent.get_address())
+        except ValueError as e:
+            print(repr(e), ip, "/", port)
+            traceback.print_exc()
+            return None
         return parent.get_address()
 
     def print_all(self):
