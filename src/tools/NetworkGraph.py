@@ -264,7 +264,7 @@ class NetworkGraph:
         for node in self.nodes:
             if node.alive:
                 if node.is_expired():
-                    result += node
+                    result.append(node)
         return result
 
     def remove_all_expired_nodes(self):
