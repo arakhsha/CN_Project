@@ -403,7 +403,8 @@ class Peer:
 
         :return:
         """
-        pass
+        new_address = packet.get_source_server_address()
+        self.stream.add_node(new_address, set_register_connection=False)
 
     def __get_neighbour(self, sender):
         """
