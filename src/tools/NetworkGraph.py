@@ -208,11 +208,19 @@ class NetworkGraph:
     def find_parent_and_assign(self, ip, port):
         parent = self.find_parent((ip, port))
         self.assign_parent(ip, port, parent.get_address())
+        return parent.get_address()
 
     def print_all(self):
         for node in self.nodes:
             node.print_summary()
             print("\n")
+
+    def is_registered(self, peer_address):
+        for node in self.nodes:
+            ip, port = node.get_address()
+            if ip == peer_address[0] and port == peer_address[1]:
+                return True
+        return False
 
 
 if __name__ == "__main__":

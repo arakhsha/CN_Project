@@ -63,7 +63,6 @@ class Peer:
         if not is_root:
             self.stream.add_node(root_address, True)
 
-
     def start_user_interface(self):
         """
         For starting UserInterface thread.
@@ -130,7 +129,6 @@ class Peer:
             time.sleep(2)
 
 
-
     def run_reunion_daemon(self):
         """
 
@@ -190,8 +188,18 @@ class Peer:
         # print("Header: ", packet.get_header())
         # print("Body: ", packet.get_body())
 
+        # TODO: packet validation
+
         if packet.get_type() == Type.register:
             self.__handle_register_packet(packet)
+        elif packet.get_type() == Type.advertise:
+            self.__handle_advertise_packet(packet)
+        elif packet.get_type() == Type.join:
+            self.__handle_join_packet(packet)
+        elif packet.get_type() == Type.message:
+            self.__handle_message_packet(packet)
+        elif packet.get_type() == Type.reunion:
+            self.__handle_reunion_packet(packet)
 
     def __check_registered(self, source_address):
         """
@@ -202,7 +210,8 @@ class Peer:
 
         :return:
         """
-        pass
+        # TODO: ba rakhsha check konam
+        return self.network_graph.is_registered(source_address)
 
     def __handle_advertise_packet(self, packet):
         """
@@ -343,7 +352,7 @@ class Peer:
         :param sender: Sender of the packet
         :return: The specified neighbour for the sender; The format is like ('192.168.001.001', '05335').
         """
-        pass
+        return self.network_graph.find_parent_and_assign(sender[0], sender[1])
 
     def parse_in_buf(self):
         buffer = self.stream.read_in_buf()
