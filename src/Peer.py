@@ -474,7 +474,7 @@ class Peer:
         if len(buffer) < header_size:
             return None
 
-        packet = Packet(buf=buffer)
+        packet = Packet(buf=buffer[0:20])
         packet_length = packet.get_length()
         if len(buffer) < packet_length:
             return None
