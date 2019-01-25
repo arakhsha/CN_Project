@@ -65,7 +65,10 @@ class Peer:
             self.network_graph = NetworkGraph(root_node)
 
         if not is_root:
-            self.stream.add_node(root_address, True)
+            try:
+                self.stream.add_node(root_address, True)
+            except LostConnection as lc:
+                print("Couldn't connect to root")
             self.father_address = None
             self.send_reunion_timer = 4
             self.last_reunion_back = 0
@@ -311,12 +314,15 @@ class Peer:
                 except ValueError as e:
                     print(repr(e))
             self.father_address = (server_ip, server_port)
-            self.stream.add_node(self.father_address)
+            try:
+                self.stream.add_node(self.father_address)
+                res = self.packet_factory.new_join_packet((self.ip, self.port))
+                self.stream.add_message_to_out_buff(self.father_address, res.get_buf())
+                self.is_alive = True
+                self.last_reunion_back = time.time() + Peer.INITIAL_TIME_FOR_REUNION
+            except LostConnection as lc:
+                print("Coudn't connect to father")
 
-            res = self.packet_factory.new_join_packet((self.ip, self.port))
-            self.stream.add_message_to_out_buff(self.father_address, res.get_buf())
-            self.is_alive = True
-            self.last_reunion_back = time.time() + Peer.INITIAL_TIME_FOR_REUNION
 
     def __handle_register_packet(self, packet):
         """
@@ -340,9 +346,12 @@ class Peer:
             port = int(body[18:23])
             print("Registering ", ip, port)
             self.network_graph.register_node(ip, port)
-            self.stream.add_node((ip, port), set_register_connection=True)
-            res = self.packet_factory.new_register_packet("RES", (self.ip, self.port))
-            self.stream.add_message_to_out_buff((ip, port), res.get_buf())
+            try:
+                self.stream.add_node((ip, port), set_register_connection=True)
+                res = self.packet_factory.new_register_packet("RES", (self.ip, self.port))
+                self.stream.add_message_to_out_buff((ip, port), res.get_buf())
+            except LostConnection as lc:
+                print("Coudn't connect to registered node")
         elif type == "RES" and (not self.is_root):
             if body[3:6] == "ACK":
                 print("Register ACKed")
@@ -461,7 +470,10 @@ class Peer:
         :return:
         """
         new_address = packet.get_source_server_address()
-        self.stream.add_node(new_address, set_register_connection=False)
+        try:
+            self.stream.add_node(new_address, set_register_connection=False)
+        except LostConnection as lc:
+            print("Coudn't connect to joined node from", new_address)
 
     def __get_neighbour(self, sender):
         """
