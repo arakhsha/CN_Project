@@ -59,9 +59,9 @@ class Peer:
 
         if not self.has_gui:
             self.interface = UserInterface()
+            self.interface.setDaemon(True)
         else:
             self.interface = GraphicalUserInterface(is_root)
-        self.interface.setDaemon(True)
         self.parse_interface_thread = threading.Thread(target=self.handle_user_interface_buffer, daemon=True)
 
         self.is_root = is_root
@@ -87,7 +87,10 @@ class Peer:
 
         :return:
         """
-        self.interface.start()
+        if self.has_gui:
+            self.interface.run()
+        else:
+            self.interface.start()
         self.parse_interface_thread.start()
 
     def handle_user_interface_buffer(self):
@@ -396,7 +399,10 @@ class Peer:
             print("Ignored a Message from unknown source")
             return
         body = packet.get_body()
-        print("Message Received:\n", body)
+        if self.has_gui:
+            self.interface.append_message(body)
+        else:
+            print("Message Received:\n", body)
         packet = self.packet_factory.new_message_packet(body, (self.ip, self.port))
         for node in self.stream.get_nodes():
             if node.get_server_address() != sender and (not node.is_register):
