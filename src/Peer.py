@@ -60,7 +60,7 @@ class Peer:
         self.root_address = root_address
         self.reunion_daemon = threading.Thread(target=self.run_reunion_daemon, daemon=True)
         if is_root:
-            root_node = GraphNode((server_port, server_ip))
+            root_node = GraphNode((server_ip, server_port))
             self.network_graph = NetworkGraph(root_node)
 
         if not is_root:
@@ -92,19 +92,30 @@ class Peer:
             2. Don't forget to clear our UserInterface buffer.
         :return:
         """
-        while True:
-            while len(self.interface.buffer) > 0:
-                args = self.interface.buffer[0].split()
-                command = args[0]
-                self.interface.buffer = self.interface.buffer[1:]
-                if command.lower() == "register":
-                    self.register()
-                elif command.lower() == "advertise":
-                    self.advertise()
-                elif command.lower() == "sendmessage":
-                    if len(args) >= 1:
-                        self.send_message(args[1])
-            time.sleep(0.1)
+
+        if self.is_root:
+            while True:
+                while len(self.interface.buffer) > 0:
+                    args = self.interface.buffer[0].split()
+                    command = args[0]
+                    self.interface.buffer = self.interface.buffer[1:]
+                    if command.lower() == "showmap" or command.lower() == "sm":
+                        self.network_graph.print_all()
+                time.sleep(0.1)
+        else:
+            while True:
+                while len(self.interface.buffer) > 0:
+                    args = self.interface.buffer[0].split()
+                    command = args[0]
+                    self.interface.buffer = self.interface.buffer[1:]
+                    if command.lower() == "register":
+                        self.register()
+                    elif command.lower() == "advertise":
+                        self.advertise()
+                    elif command.lower() == "sendmessage":
+                        if len(args) >= 1:
+                            self.send_message(args[1])
+                time.sleep(0.1)
 
     def run(self):
         """
@@ -130,6 +141,7 @@ class Peer:
         while True:
             packet = self.parse_in_buf()
             while packet is not None:
+                print("FUCK PACKET:", packet.get_body())
                 self.handle_packet(packet)
                 packet = self.parse_in_buf()
             self.stream.send_out_buf_messages()
@@ -211,6 +223,8 @@ class Peer:
 
         # TODO: packet validation
 
+        print("PACKET BODY:", packet.body)
+
         if packet.get_type() == Type.register:
             self.__handle_register_packet(packet)
         elif packet.get_type() == Type.advertise:
@@ -265,6 +279,7 @@ class Peer:
         """
         body = packet.get_body()
         type = body[0:3]
+        print("RCVD packet:", packet.body)
         if type == "REQ" and self.is_root:
             ip = packet.get_source_server_ip()
             port = int(packet.get_source_server_port())
@@ -290,8 +305,10 @@ class Peer:
                     print(repr(e))
             self.father_address = (server_ip, server_port)
             self.stream.add_node(self.father_address)
+
             res = self.packet_factory.new_join_packet((self.ip, self.port))
             self.stream.add_message_to_out_buff(self.father_address, res.get_buf())
+            self.is_alive = True
 
     def __handle_register_packet(self, packet):
         """
@@ -314,7 +331,7 @@ class Peer:
             ip = body[3:18]
             port = int(body[18:23])
             print("Registering ", ip, port)
-            # TODO Graph Checks and operations
+            self.network_graph.register_node(ip, port)
             self.stream.add_node((ip, port), set_register_connection=True)
             res = self.packet_factory.new_register_packet("RES", (self.ip, self.port))
             self.stream.add_message_to_out_buff((ip, port), res.get_buf())
@@ -473,7 +490,9 @@ class Peer:
         self.stream.add_message_to_out_buff(self.root_address, req.get_buf())
 
     def advertise(self):
-        print("Advertisement Command!")
+        print("Advertisement Command")
+        req = self.packet_factory.new_advertise_packet("REQ",(self.ip, self.port))
+        self.stream.add_message_to_out_buff(self.root_address, req.get_buf())
         pass
 
     def send_message(self, message):

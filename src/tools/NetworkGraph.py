@@ -142,7 +142,7 @@ class NetworkGraph:
             bfs_queue.put(self.root)
             while not bfs_queue.empty():
                 head = bfs_queue.get()
-                if head.is_available() and (sender_node.parent is not None):
+                if head.is_available() and (sender_node.parent is not head):
                     return head
                 for child in head.children:
                     if child is not sender_node:
@@ -187,6 +187,7 @@ class NetworkGraph:
 
             node.remove_from_parent()
             node.parent = None
+            node.set_dead()
             # self.nodes.remove(node)
         pass
 
@@ -237,6 +238,8 @@ class NetworkGraph:
 
     def find_parent_and_assign(self, ip, port):
         parent = self.find_parent((ip, port))
+        if parent is None:
+            return None
         try:
             self.assign_parent(ip, port, parent.get_address())
         except ValueError as e:
@@ -259,14 +262,14 @@ class NetworkGraph:
     def __get_all_expired_nodes(self):
         result = []
         for node in self.nodes:
-            if node.is_expired():
-                result += node
+            if node.alive:
+                if node.is_expired():
+                    result += node
         return result
 
     def remove_all_expired_nodes(self):
         for node in self.__get_all_expired_nodes():
-            if node.alive:
-                self.remove_node(node.get_address)
+            self.remove_node(node.get_address)
 
     def update_latest_reunion_time(self, peer_address):
         node = self.find_node(peer_address[0], peer_address[1])
