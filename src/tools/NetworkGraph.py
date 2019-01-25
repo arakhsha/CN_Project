@@ -25,6 +25,7 @@ class GraphNode:
         self.alive = True
         for child in self.children:
             child.alive = True
+        self.latest_reunion_time = time.time() + 8
         pass
 
     def set_address(self, new_address):
@@ -92,11 +93,10 @@ class GraphNode:
         return (time.time() - self.latest_reunion_time) <= self.expiration_time()
 
     def expiration_time(self):
-        # TODO: expiration time policy
         if self.depth() >= 0:
-            return self.depth()*0.1+4
+            return self.depth()*2.5+4
         else:
-            return 0.1*8+4
+            return 2.5*8+4
 
     def depth(self):
         if self.is_root:
@@ -186,6 +186,7 @@ class NetworkGraph:
                 child_node.set_dead()
 
             node.remove_from_parent()
+            node.parent = None
             # self.nodes.remove(node)
         pass
 
