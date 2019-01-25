@@ -405,7 +405,8 @@ class Peer:
         pass
 
     def send_reunion(self):
-        pass
+        reunion_packet = self.packet_factory.new_reunion_packet("REQ", (self.ip, self.port), [(self.ip, self.port)])
+        self.stream.add_message_to_out_buff(self.father_address, reunion_packet.get_buf())
 
     def timeout(self):
         self.is_alive = False
