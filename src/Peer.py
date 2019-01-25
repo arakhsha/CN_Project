@@ -408,4 +408,5 @@ class Peer:
         pass
 
     def timeout(self):
-        pass
+        self.is_alive = False
+        self.advertise()
