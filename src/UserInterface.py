@@ -13,3 +13,11 @@ class UserInterface(threading.Thread):
         while True:
             message = input("Write your command:\n")
             self.buffer.append(message)
+
+
+class GraphicalUserInterface(UserInterface):
+
+    def __init__(self, is_root):
+        UserInterface.__init__(self)
+        self.is_root = is_root
+

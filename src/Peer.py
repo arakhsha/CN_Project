@@ -3,7 +3,7 @@ import traceback
 from src.Stream import Stream
 from src.Packet import Packet, PacketFactory
 from src.Type import Type
-from src.UserInterface import UserInterface
+from src.UserInterface import UserInterface, GraphicalUserInterface
 from src.tools.Node import Node, LostConnection
 from src.tools.SemiNode import SemiNode
 from src.tools.NetworkGraph import NetworkGraph, GraphNode
@@ -23,7 +23,7 @@ class Peer:
     SEND_REUNION_INTERVAL = 4
     REUNION_BACK_TIMEOUT = 4 + 2 * (8 * 2.5) + 2
 
-    def __init__(self, server_ip, server_port, is_root=False, root_address=None):
+    def __init__(self, server_ip, server_port, is_root=False, root_address=None, gui=False):
         """
         The Peer object constructor.
 
@@ -50,12 +50,17 @@ class Peer:
         :type is_root: bool
         :type root_address: tuple
         """
+        self.has_gui = gui
+
         self.ip = Node.parse_ip(server_ip)
         self.port = server_port
         self.stream = Stream(server_ip, server_port)
         self.packet_factory = PacketFactory()
 
-        self.interface = UserInterface()
+        if not self.has_gui:
+            self.interface = UserInterface()
+        else:
+            self.interface = GraphicalUserInterface(is_root)
         self.interface.setDaemon(True)
         self.parse_interface_thread = threading.Thread(target=self.handle_user_interface_buffer, daemon=True)
 
