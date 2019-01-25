@@ -38,6 +38,9 @@ class GraphicalUserInterface(UserInterface):
             message_text.set("")
             self.append_message(msg=msg)
 
+        def show_map(event=None):
+            self.buffer.append("showmap")
+
         top = Tk()
         top.title("P2P App")
         list1 = Listbox(top, height=6, width=35)
@@ -59,7 +62,8 @@ class GraphicalUserInterface(UserInterface):
         b3.grid(row=8, column=0)
 
         if self.is_root:
-
+            b1 = ttk.Button(top, text="ShowMap(Terminal)", width=12, command=show_map)
+            b1.grid(row=0, column=4)
             pass
         else:
             b1 = ttk.Button(top, text="Register", width=12, command=register)
@@ -76,3 +80,4 @@ class GraphicalUserInterface(UserInterface):
 if __name__ == "__main__":
     gui = GraphicalUserInterface(False)
     gui.run()
+
