@@ -62,7 +62,7 @@ class GraphicalUserInterface(UserInterface):
         b3.grid(row=8, column=0)
 
         if self.is_root:
-            b1 = ttk.Button(top, text="ShowMap(Terminal)", width=12, command=show_map)
+            b1 = ttk.Button(top, text="ShowMap(Terminal)", width=15, command=show_map)
             b1.grid(row=0, column=4)
             pass
         else:
