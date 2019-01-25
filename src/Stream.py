@@ -77,6 +77,9 @@ class Stream:
 
         :return:
         """
+        for node in self.nodes:
+            if node.is_register == set_register_connection and node.get_server_address() == server_address:
+                return
         node = Node(server_address, set_root=False, set_register=set_register_connection)
         self.nodes.append(node)
         pass
