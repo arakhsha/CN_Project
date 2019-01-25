@@ -152,20 +152,28 @@ class Peer:
 
         :return:
         """
-        self.start_user_interface()
-        self.reunion_daemon.start()
-        # TODO Warning 1?
-        while True:
-            packet = self.parse_in_buf()
-            while packet is not None:
-                print("PACKET HEADER:", packet.get_header())
-                self.handle_packet(packet)
+
+        def ordinary_run_daemon():
+            self.reunion_daemon.start()
+            # TODO Warning 1?
+            while True:
                 packet = self.parse_in_buf()
-            try:
-                self.stream.send_out_buf_messages()
-            except LostConnection as lc:
-                self.handle_lost_connection(lc.node)
-            time.sleep(2)
+                while packet is not None:
+                    print("PACKET HEADER:", packet.get_header())
+                    self.handle_packet(packet)
+                    packet = self.parse_in_buf()
+                try:
+                    self.stream.send_out_buf_messages()
+                except LostConnection as lc:
+                    self.handle_lost_connection(lc.node)
+                time.sleep(2)
+        ordinary_run_thread = threading.Thread(target=ordinary_run_daemon, daemon=True)
+        if self.has_gui:
+            ordinary_run_thread.start()
+            self.start_user_interface()
+        else:
+            self.start_user_interface()
+            ordinary_run_daemon()
 
     def run_reunion_daemon(self):
         """
@@ -333,7 +341,6 @@ class Peer:
                 self.last_reunion_back = time.time() + Peer.INITIAL_TIME_FOR_REUNION
             except LostConnection as lc:
                 print("Coudn't connect to father")
-
 
     def __handle_register_packet(self, packet):
         """
