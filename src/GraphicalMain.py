@@ -54,4 +54,4 @@ if __name__ == "__main__":
     root_button.pack(side=LEFT)
     client_button = ttk.Button(top, text="Client", command=client)
     client_button.pack(side=RIGHT)
-    mainloop()
+    top.mainloop()
