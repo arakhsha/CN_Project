@@ -1,5 +1,6 @@
 import queue
 import time
+import traceback
 
 
 class GraphNode:
@@ -67,7 +68,8 @@ class GraphNode:
         return (not self.is_full()) and self.alive
 
     def remove_from_parent(self):
-        self.parent.remove_child(self)
+        if self.parent is not None:
+            self.parent.remove_child(self)
 
     def remove_child(self, child):
         self.children.remove(child)
@@ -227,7 +229,7 @@ class NetworkGraph:
 
         if node.parent is not None:
             # TODO: we still don't know what to do in this case
-            parent_node.remove_child(node)
+            node.remove_from_parent()
             pass
 
         # add to child
@@ -244,6 +246,7 @@ class NetworkGraph:
             self.assign_parent(ip, port, parent.get_address())
         except ValueError as e:
             print(repr(e), ip, "/", port)
+            traceback.print_exc()
             return None
         return parent.get_address()
 

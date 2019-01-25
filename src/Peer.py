@@ -1,3 +1,5 @@
+import traceback
+
 from src.Stream import Stream
 from src.Packet import Packet, PacketFactory
 from src.Type import Type
@@ -313,6 +315,7 @@ class Peer:
                     self.stream.remove_node(parent_node)
                 except ValueError as e:
                     print(repr(e))
+                    traceback.print_exc()
             self.father_address = (server_ip, server_port)
             try:
                 self.stream.add_node(self.father_address)
