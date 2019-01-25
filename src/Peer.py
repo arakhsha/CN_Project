@@ -102,6 +102,9 @@ class Peer:
                     self.interface.buffer = self.interface.buffer[1:]
                     if command.lower() == "showmap" or command.lower() == "sm":
                         self.network_graph.print_all()
+                    elif command.lower() == "sendmessage":
+                        if len(args) >= 1:
+                            self.send_message(args[1])
                 time.sleep(0.1)
         else:
             while True:
