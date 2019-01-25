@@ -141,7 +141,7 @@ class Peer:
         while True:
             packet = self.parse_in_buf()
             while packet is not None:
-                print("FUCK PACKET:", packet.get_header())
+                print("PACKET HEADER:", packet.get_header())
                 self.handle_packet(packet)
                 packet = self.parse_in_buf()
             self.stream.send_out_buf_messages()
@@ -222,8 +222,6 @@ class Peer:
         # print("Body: ", packet.get_body())
 
         # TODO: packet validation
-
-        # print("PACKET BODY:", packet.body)
 
         if packet.get_type() == Type.register:
             self.__handle_register_packet(packet)
@@ -414,7 +412,6 @@ class Peer:
         if type == "REQ":
             if self.is_root:
                 self.network_graph.update_latest_reunion_time(entries[0])
-                print("Time: ", time.time(), "Reunion Hello Received from ", entries[0])
                 first_hop = entries[-1]
                 entries.reverse()
                 res = self.packet_factory.new_reunion_packet("RES", (self.ip, self.port), entries)
