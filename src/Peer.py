@@ -323,7 +323,7 @@ class Peer:
         :return: Whether is address in our neighbours or not.
         :rtype: bool
         """
-        pass
+        return self.stream.get_node_by_server(address) is not None
 
     def __handle_message_packet(self, packet):
         """
@@ -339,7 +339,17 @@ class Peer:
 
         :return:
         """
-        pass
+        sender = packet.get_source_server_address()
+        if self.__check_neighbour(sender):
+            print("Ignored a Message from unknown source")
+            return
+        body = packet.get_body()
+        packet = self.packet_factory.new_message_packet(body, (self.ip, self.port))
+        for node in self.stream.get_nodes():
+            if node.get_server_address() != sender and (not node.is_register):
+                self.stream.add_message_to_out_buff(node.get_server_address(), packet.get_buf())
+
+
 
     def __handle_reunion_packet(self, packet):
         """
@@ -403,11 +413,6 @@ class Peer:
             next_hop = entries[-1]
             res = self.packet_factory.new_reunion_packet("RES", (self.ip, self.port), entries)
             self.stream.add_message_to_out_buff(next_hop, res.get_buf())
-
-
-
-
-
 
     def __handle_join_packet(self, packet):
         """
