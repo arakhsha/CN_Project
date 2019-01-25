@@ -17,9 +17,9 @@ import threading
 
 
 class Peer:
-
     SEND_REUNION_INTERVAL = 4
     REUNION_BACK_TIMEOUT = 4 + 2 * (8 * 2.5) + 2
+
     def __init__(self, server_ip, server_port, is_root=False, root_address=None):
         """
         The Peer object constructor.
@@ -134,7 +134,6 @@ class Peer:
                 packet = self.parse_in_buf()
             self.stream.send_out_buf_messages()
             time.sleep(2)
-
 
     def run_reunion_daemon(self):
         """
@@ -281,8 +280,18 @@ class Peer:
             server_ip = body[3:18]
             server_port = int(body[18:23])
             print("Proposed Parent:", server_ip, server_port)
+
+            # remove former parent node
+            if self.father_address is not None:
+                try:
+                    self.stream.remove_node(self.stream.get_node_by_server(self.father_address[0],
+                                                                           self.father_address[1]))
+                except ValueError as e:
+                    print(repr(e))
             self.father_address = (server_ip, server_port)
-            # TODO stream and shit
+            self.stream.add_node(self.father_address)
+            res = self.packet_factory.new_join_packet((self.ip, self.port))
+            self.stream.add_message_to_out_buff(self.father_address, res.get_buf())
 
     def __handle_register_packet(self, packet):
         """
@@ -350,8 +359,6 @@ class Peer:
         for node in self.stream.get_nodes():
             if node.get_server_address() != sender and (not node.is_register):
                 self.stream.add_message_to_out_buff(node.get_server_address(), packet.get_buf())
-
-
 
     def __handle_reunion_packet(self, packet):
         """
