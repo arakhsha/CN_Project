@@ -368,7 +368,7 @@ class Peer:
         :return:
         """
         sender = packet.get_source_server_address()
-        if self.__check_neighbour(sender):
+        if not self.__check_neighbour(sender):
             print("Ignored a Message from unknown source")
             return
         body = packet.get_body()
