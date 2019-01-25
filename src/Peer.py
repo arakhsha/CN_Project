@@ -17,6 +17,7 @@ import threading
 
 
 class Peer:
+    INITIAL_TIME_FOR_REUNION = 8
     SEND_REUNION_INTERVAL = 4
     REUNION_BACK_TIMEOUT = 4 + 2 * (8 * 2.5) + 2
 
@@ -184,6 +185,7 @@ class Peer:
                     self.send_reunion()
                     self.send_reunion_timer = Peer.SEND_REUNION_INTERVAL
                 if time.time() - self.last_reunion_back > Peer.REUNION_BACK_TIMEOUT and self.is_alive:
+                    print("Time:", time.time(), "Last:", self.last_reunion_back, "Timeout!!")
                     self.timeout()
                 time.sleep(interval)
 
@@ -307,6 +309,7 @@ class Peer:
             res = self.packet_factory.new_join_packet((self.ip, self.port))
             self.stream.add_message_to_out_buff(self.father_address, res.get_buf())
             self.is_alive = True
+            self.last_reunion_back = time.time() + Peer.INITIAL_TIME_FOR_REUNION
 
     def __handle_register_packet(self, packet):
         """
