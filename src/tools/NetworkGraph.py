@@ -227,7 +227,7 @@ class NetworkGraph:
 
         if node.parent is not None:
             # TODO: we still don't know what to do in this case
-            parent_node.remove_child(node)
+            node.remove_from_parent()
             pass
 
         # add to child
@@ -240,11 +240,11 @@ class NetworkGraph:
         parent = self.find_parent((ip, port))
         if parent is None:
             return None
-        try:
-            self.assign_parent(ip, port, parent.get_address())
-        except ValueError as e:
-            print(repr(e), ip, "/", port)
-            return None
+        # try:
+        self.assign_parent(ip, port, parent.get_address())
+        # except ValueError as e:
+        #     print(repr(e), ip, "/", port)
+        #     return None
         return parent.get_address()
 
     def print_all(self):
