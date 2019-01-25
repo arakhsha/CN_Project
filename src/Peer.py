@@ -176,7 +176,6 @@ class Peer:
                     self.timeout()
                 time.sleep(interval)
 
-
     def send_broadcast_packet(self, broadcast_packet):
         """
 
@@ -190,7 +189,9 @@ class Peer:
 
         :return:
         """
-        pass
+        for node in self.stream.get_nodes():
+            if not node.is_register:
+                self.stream.add_message_to_out_buff(node.get_server_address(), broadcast_packet.get_buf())
 
     def handle_packet(self, packet):
         """
@@ -470,7 +471,8 @@ class Peer:
 
     def send_message(self, message):
         print("Message Command! Message:", message)
-        pass
+        packet = self.packet_factory.new_message_packet(message, (self.ip, self.port))
+        self.send_broadcast_packet(packet)
 
     def send_reunion(self):
         reunion_packet = self.packet_factory.new_reunion_packet("REQ", (self.ip, self.port), [(self.ip, self.port)])
