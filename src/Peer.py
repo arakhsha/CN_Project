@@ -284,8 +284,8 @@ class Peer:
             # remove former parent node
             if self.father_address is not None:
                 try:
-                    self.stream.remove_node(self.stream.get_node_by_server(self.father_address[0],
-                                                                           self.father_address[1]))
+                    parent_node = self.stream.get_node_by_server(self.father_address[0], self.father_address[1], only_not_registers=True)
+                    self.stream.remove_node(parent_node)
                 except ValueError as e:
                     print(repr(e))
             self.father_address = (server_ip, server_port)
