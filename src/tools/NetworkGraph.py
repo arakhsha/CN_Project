@@ -67,7 +67,8 @@ class GraphNode:
         return (not self.is_full()) and self.alive
 
     def remove_from_parent(self):
-        self.parent.remove_child(self)
+        if self.parent is not None:
+            self.parent.remove_child(self)
 
     def remove_child(self, child):
         self.children.remove(child)
