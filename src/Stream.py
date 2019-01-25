@@ -98,7 +98,7 @@ class Stream:
         """
         if node in self.nodes:
             self.nodes.remove(node)
-        node.close()
+            node.close()
 
     def get_node_by_server(self, ip, port, only_not_registers=False):
         """
