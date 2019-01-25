@@ -17,6 +17,9 @@ import threading
 
 
 class Peer:
+
+    SEND_REUNION_INTERVAL = 4
+    REUNION_BACK_TIMEOUT = 4 + 2 * (8 * 2.5) + 2
     def __init__(self, server_ip, server_port, is_root=False, root_address=None):
         """
         The Peer object constructor.
@@ -62,6 +65,10 @@ class Peer:
 
         if not is_root:
             self.stream.add_node(root_address, True)
+            self.father_address = None
+            self.send_reunion_timer = 4
+            self.last_reunion_back = 0
+            self.is_alive = False
 
     def start_user_interface(self):
         """
@@ -154,11 +161,21 @@ class Peer:
 
         :return:
         """
+        interval = 0.1
         if self.is_root:
-            self.network_graph.remove_all_expired_nodes()
+            while True:
+                self.network_graph.remove_all_expired_nodes()
+                time.sleep(interval)
         else:
-            # TODO
-            pass
+            while True:
+                self.send_reunion_timer -= interval
+                if self.send_reunion_timer <= 0 and self.is_alive:
+                    self.send_reunion()
+                    self.send_reunion_timer = Peer.SEND_REUNION_INTERVAL
+                if time.time() - self.last_reunion_back > Peer.REUNION_BACK_TIMEOUT and self.is_alive:
+                    self.timeout()
+                time.sleep(interval)
+
 
     def send_broadcast_packet(self, broadcast_packet):
         """
@@ -385,4 +402,10 @@ class Peer:
 
     def send_message(self, message):
         print("Message Command! Message:", message)
+        pass
+
+    def send_reunion(self):
+        pass
+
+    def timeout(self):
         pass
