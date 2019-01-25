@@ -24,6 +24,7 @@ class GraphicalUserInterface(UserInterface):
         UserInterface.__init__(self)
         self.is_root = is_root
         self.msgs = None
+        self.online = None
 
     def run(self):
         def register(event=None):
@@ -61,21 +62,31 @@ class GraphicalUserInterface(UserInterface):
         b3 = ttk.Button(top, text="Send Message", width=12, command=sendmessage)
         b3.grid(row=8, column=0)
 
+        self.online = StringVar()
+        l1 = ttk.Label(top, textvariable=self.online)
+        l1.grid(row=2, column=4)
+
         if self.is_root:
             b1 = ttk.Button(top, text="ShowMap(Terminal)", width=15, command=show_map)
             b1.grid(row=0, column=4)
-            pass
+            self.online.set("Online")
         else:
             b1 = ttk.Button(top, text="Register", width=12, command=register)
             b1.grid(row=0, column=4)
 
             b2 = ttk.Button(top, text="Advertise", width=12, command=advertise)
             b2.grid(row=1, column=4)
+            self.online.set("Offline")
         mainloop()
 
     def append_message(self, msg):
         self.msgs.insert(END, msg)
 
+    def set_alive(self, value):
+        if value:
+            self.online.set("Online")
+        else:
+            self.online.set("Offline")
 
 if __name__ == "__main__":
     gui = GraphicalUserInterface(False)

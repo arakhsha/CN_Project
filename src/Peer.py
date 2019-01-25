@@ -316,6 +316,8 @@ class Peer:
                 res = self.packet_factory.new_join_packet((self.ip, self.port))
                 self.stream.add_message_to_out_buff(self.father_address, res.get_buf())
                 self.is_alive = True
+                if self.has_gui:
+                    self.interface.set_alive(self.is_alive)
                 self.last_reunion_back = time.time() + Peer.INITIAL_TIME_FOR_REUNION
             except LostConnection as lc:
                 print("Coudn't connect to father")
@@ -525,6 +527,8 @@ class Peer:
 
     def timeout(self):
         self.is_alive = False
+        if self.has_gui:
+            self.interface.set_alive(self.is_alive)
         self.advertise()
 
     def handle_lost_connection(self, node):
