@@ -280,7 +280,8 @@ class Peer:
             server_ip = body[3:18]
             server_port = int(body[18:23])
             print("Proposed Parent:", server_ip, server_port)
-            # TODO: send join message to parent and handle parent in self and Stream
+            self.father_address = (server_ip, server_port)
+            # TODO stream and shit
 
     def __handle_register_packet(self, packet):
         """

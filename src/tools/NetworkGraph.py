@@ -94,9 +94,9 @@ class GraphNode:
 
     def expiration_time(self):
         if self.depth() >= 0:
-            return self.depth()*2.5+4
+            return self.depth() * 2.5 + 4
         else:
-            return 2.5*8+4
+            return 2.5 * 8 + 4
 
     def depth(self):
         if self.is_root:
@@ -105,7 +105,7 @@ class GraphNode:
             return -1
         if self.parent.depth() == -1:
             return -1
-        return self.parent.depth()+1
+        return self.parent.depth() + 1
 
 
 class NetworkGraph:
@@ -134,20 +134,20 @@ class NetworkGraph:
         :rtype: GraphNode
         """
 
-        # sender_node = self.find_node(sender[0], sender[1])
-        # if sender_node is None:
-        #     return None
-        # else:
-        # TODO warning
-        bfs_queue = queue.Queue(-1)
-        bfs_queue.put(self.root)
-        while not bfs_queue.empty():
-            head = bfs_queue.get()
-            if head.is_available():
-                return head
-            for child in head.children:
-                bfs_queue.put(child)
-        return None
+        sender_node = self.find_node(sender[0], sender[1])
+        if sender_node is None:
+            return None
+        else:
+            bfs_queue = queue.Queue(-1)
+            bfs_queue.put(self.root)
+            while not bfs_queue.empty():
+                head = bfs_queue.get()
+                if head.is_available() and (sender_node.parent is not None):
+                    return head
+                for child in head.children:
+                    if child is not sender_node:
+                        bfs_queue.put(child)
+            return None
 
     def find_node(self, ip, port):
         for node in self.nodes:
