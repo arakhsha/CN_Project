@@ -351,7 +351,7 @@ class Peer:
         :return: Whether is address in our neighbours or not.
         :rtype: bool
         """
-        return self.stream.get_node_by_server(address) is not None
+        return self.stream.get_node_by_server(address[0], address[1]) is not None
 
     def __handle_message_packet(self, packet):
         """
