@@ -16,6 +16,8 @@ class GraphNode:
         self.parent = None
         self.children = []
         self.alive = False
+        self.latest_reunion_time = None
+        self.is_root = False
         pass
 
     def set_parent(self, parent):
@@ -78,12 +80,34 @@ class GraphNode:
         print("children:")
         for child in self.children:
             print(child.ip + "/" + str(child.port))
+        print("last update:", self.latest_reunion_time)
+        print("depth:", self.depth())
+
+    def update_latest_reunion_time(self):
+        self.latest_reunion_time = time.time()
+
+    def is_expired(self):
+        return (time.time() - self.latest_reunion_time) <= self.expiration_time()
+
+    def expiration_time(self):
+        # TODO: expiration time policy
+        return self.depth()*0.1+4
+
+    def depth(self):
+        if self.is_root:
+            return 0
+        if self.parent is None:
+            return -1
+        if self.parent.depth() == -1:
+            return -1
+        return self.parent.depth()+1
 
 
 class NetworkGraph:
     def __init__(self, root):
         self.root = root
         root.alive = True
+        root.is_root = True
         self.nodes = [root]
 
     def find_parent(self, sender):
@@ -154,6 +178,7 @@ class NetworkGraph:
         else:
             for child_node in node.get_subtree():
                 child_node.set_dead()
+                child_node.parent = None
 
             node.remove_from_parent()
             self.nodes.remove(node)
@@ -221,6 +246,17 @@ class NetworkGraph:
             if ip == peer_address[0] and port == peer_address[1]:
                 return True
         return False
+
+    def __get_all_expired_nodes(self):
+        result = []
+        for node in self.nodes:
+            if node.is_expired():
+                result += node
+        return result
+
+    def remove_all_expired_nodes(self):
+        for node in self.__get_all_expired_nodes():
+            self.remove_node(node.get_address)
 
 
 if __name__ == "__main__":

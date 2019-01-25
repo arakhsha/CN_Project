@@ -154,7 +154,11 @@ class Peer:
 
         :return:
         """
-        pass
+        if self.is_root:
+            self.network_graph.remove_all_expired_nodes()
+        else:
+            # TODO
+            pass
 
     def send_broadcast_packet(self, broadcast_packet):
         """
