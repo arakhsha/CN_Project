@@ -96,7 +96,7 @@ class Stream:
         self.nodes.remove(node)
         node.close()
 
-    def get_node_by_server(self, ip, port):
+    def get_node_by_server(self, ip, port, only_not_registers=False):
         """
 
         Will find the node that has IP/Port address of input.
@@ -112,7 +112,8 @@ class Stream:
         """
         for node in self.nodes:
             if node.get_server_address() == (ip, port):
-                return node
+                if not (node.is_register and only_not_registers):
+                    return node
         return None
 
     def add_message_to_out_buff(self, address, message):
