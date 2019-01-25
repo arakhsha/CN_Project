@@ -344,6 +344,7 @@ class Peer:
             print("Ignored a Message from unknown source")
             return
         body = packet.get_body()
+        print("Message Received:\n", body)
         packet = self.packet_factory.new_message_packet(body, (self.ip, self.port))
         for node in self.stream.get_nodes():
             if node.get_server_address() != sender and (not node.is_register):
